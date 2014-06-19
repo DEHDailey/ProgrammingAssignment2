@@ -7,14 +7,17 @@
 ## return the values of a matrix and its inverse.  Once set, the inverse is
 ## cached as a part of the object and can be retrieved without re-calculating.
 
-makeCacheMatrix <- function(x = matrix()) {
+makeCacheMatrix <- function(x = matrix() ) {
+  
+  ## I like to use variable names more meaningful than 'x'
+  someMatrix <- x  ## An honest numerical matrix (we assume)
   
   # A brand-new makeCacheMatrix() object will have a missing inverse
   myInverse <- NULL
   
   ## Initiate the value of the matrix
     setMatrix <- function( y ) {
-      x         <<- y
+      someMatrix         <<- y
       myInverse <<- NULL  ## Clears the cached inverse (if any)
       
       ## Return a value to indicate the function did something reasonable
@@ -23,7 +26,7 @@ makeCacheMatrix <- function(x = matrix()) {
     
   ## Provide the current value of the matrix
     getMatrix <- function() {
-      return( x )  ## Simply returns the current matrix value
+      return( someMatrix )  ## Simply returns the current matrix value
     }
     
   ## Set the inverse of the matrix to a supplied value
@@ -56,15 +59,22 @@ makeCacheMatrix <- function(x = matrix()) {
 ## not exist, cacheSolve() will calculate the inverse and cache it for later
 ## use.
 
-cacheSolve <- function(x, ...) {
-  ## Return a matrix that is the inverse of 'x'.
-  ## 'x' is a list of functions such as returned by makeCacheMatrix( someMatrix )
+cacheSolve <- function( x, ...) {
   
   ## Toss in an error check for not-yet-cached input
-  if( is.matrix( x ) ) stop( 'x must be a list as returned by makeCacheMatrix()')
+  if( is.matrix( x ) ) {
+    stop( 'x must be a list as returned by makeCacheMatrix()')
+  } 
   
-  ## Go get the inverse associated with the input x
-  myInverse <- x$getInverse()
+  ## I like to use variable names more meaningful than 'x'
+  specialMatrix <- x
+
+  ## Return a matrix that is the inverse of 'specialMatrix '.
+  ## 'specialMatrix' is really a list of functions such as returned by
+  ## makeCacheMatrix( someMatrix )
+  
+  ## Go get the inverse associated with the input specialMatrix
+  myInverse <- specialMatrix$getInverse()
   
   ## If that inverse is not NULL, then we have just retrieved the cached value.
   ## Return that value, and be done.
@@ -76,19 +86,19 @@ cacheSolve <- function(x, ...) {
   ## If we're still in the function, the cached inverse does not exist,
   ## calculate the inverse and cache it
   ## Get the current matrix from the input x
-    myMatrix  <- x$getMatrix()
+    myMatrix  <- specialMatrix$getMatrix()
   ## Invert the matrix to get the inverse
     myInverse <- solve( myMatrix, ... )
   
   ## Set the newly-calculated inverse for the input x
-    x$setInverse( myInverse )
+    specialMatrix$setInverse( myInverse )
   
   ## Send the inverse back to the calling function
     return( myInverse )
 }
 
 
-## Usage:
+## Usage notes:
 
 ## Set up the initial matrix.  The inverse has not yet been calculated.
 #### aMatrix <- makeCacheMatrix( matrix( c( 2, 0, 0, 2 ), nrow= 2 ) )
