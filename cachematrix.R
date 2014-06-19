@@ -1,15 +1,113 @@
-## Put comments here that give an overall description of what your
-## functions do
+## R Programming at Coursera, June 2014 (rprog-004)
+## Programming Assignment 2: Caching the Inverse of a Matrix
 
-## Write a short comment describing this function
+## See usage notes at end of file
+
+## makeCacheMatrix() creates a list of four functions which both establish and
+## return the values of a matrix and its inverse.  Once set, the inverse is
+## cached as a part of the object and can be retrieved without re-calculating.
 
 makeCacheMatrix <- function(x = matrix()) {
+  
+  # A brand-new makeCacheMatrix() object will have a missing inverse
+  myInverse <- NULL
+  
+  ## Initiate the value of the matrix
+    setMatrix <- function( y ) {
+      x         <<- y
+      myInverse <<- NULL  ## Clears the cached inverse (if any)
+      
+      ## Return a value to indicate the function did something reasonable
+      return( invisible( TRUE ) )
+    }
+    
+  ## Provide the current value of the matrix
+    getMatrix <- function() {
+      return( x )  ## Simply returns the current matrix value
+    }
+    
+  ## Set the inverse of the matrix to a supplied value
+    setInverse <- function( newInverse ) {
+      myInverse <<- newInverse
+  
+      ## Return a value to indicate the function did something reasonable
+      return( invisible( TRUE ) )
+    }
+  
+  ## Provide the currently cached inverse of the matrix
+    getInverse <- function() {
+      return( myInverse )
+    }
+  
+  ## By defining the returned list here, we can modify it (if desired) before
+  ## returning it.
+  retList <- list( setMatrix  = setMatrix, 
+                   getMatrix  = getMatrix, 
+                   setInverse = setInverse, 
+                   getInverse = getInverse )
 
+  ## Explicit return() statement.
+  return( retList )
 }
 
 
-## Write a short comment describing this function
+## Use cacheSolve() to invert a special matrix created with makeCacheMatrix. 
+## cacheSolve() will use the cached inverse if it exists; if the inverse does
+## not exist, cacheSolve() will calculate the inverse and cache it for later
+## use.
 
 cacheSolve <- function(x, ...) {
-        ## Return a matrix that is the inverse of 'x'
+  ## Return a matrix that is the inverse of 'x'.
+  ## 'x' is a list of functions such as returned by makeCacheMatrix( someMatrix )
+  
+  ## Toss in an error check for not-yet-cached input
+  if( is.matrix( x ) ) stop( 'x must be a list as returned by makeCacheMatrix()')
+  
+  ## Go get the inverse associated with the input x
+  myInverse <- x$getInverse()
+  
+  ## If that inverse is not NULL, then we have just retrieved the cached value.
+  ## Return that value, and be done.
+  if(!is.null( myInverse )) {
+    message("Retrieving cached inverse")
+    return( myInverse )
+  }
+  
+  ## If we're still in the function, the cached inverse does not exist,
+  ## calculate the inverse and cache it
+  ## Get the current matrix from the input x
+    myMatrix  <- x$getMatrix()
+  ## Invert the matrix to get the inverse
+    myInverse <- solve( myMatrix, ... )
+  
+  ## Set the newly-calculated inverse for the input x
+    x$setInverse( myInverse )
+  
+  ## Send the inverse back to the calling function
+    return( myInverse )
 }
+
+
+## Usage:
+
+## Set up the initial matrix.  The inverse has not yet been calculated.
+#### aMatrix <- makeCacheMatrix( matrix( c( 2, 0, 0, 2 ), nrow= 2 ) )
+
+## You can see the current value of the matrix with
+#### aMatrix$getMatrix()
+
+## The matrix values can be changed via
+#### aMatrix$setMatrix( matrix( c( 4, 0, 0, 4 ), nrow = 2 ) )
+#### aMatrix$getMatrix()  ## Check to see they've changed
+
+## You can see the current value of the inverse with
+#### aMatrix$getInverse()
+## Which is NULL right now because cacheSolve() hasn't been called since the
+## last setMatrix() function
+
+## You can calculate the inverse of the current matrix with
+#### ( anInverse <- cacheSolve( aMatrix ) )
+## Note: enclose in parentheses to do the assignment and print the value at the same time
+
+## Do it again, and the function tells you it's grabbing cached data
+#### ( anInverse <- cacheSolve( aMatrix ) )
